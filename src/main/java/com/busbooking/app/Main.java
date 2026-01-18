@@ -1,0 +1,7 @@
+package com.busbooking.app;
+
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("BusTicketBookingSystem placeholder Main");
+    }
+}
