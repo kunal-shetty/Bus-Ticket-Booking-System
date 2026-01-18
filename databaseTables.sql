@@ -45,3 +45,5 @@ CREATE TABLE bookings (
         REFERENCES buses(bus_id)
         ON DELETE CASCADE
 );
+
+INSERT INTO users(name, email, password) VALUES("test", "test@gmail.com", 12345678);

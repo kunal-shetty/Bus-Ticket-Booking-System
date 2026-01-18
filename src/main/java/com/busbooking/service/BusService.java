@@ -1,3 +1,0 @@
-package com.busbooking.service;
-
-public class BusService {}

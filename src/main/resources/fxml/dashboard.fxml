@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.busbooking.controller.DashboardController">
+
+    <!-- ===== TOP HEADER ===== -->
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20"
+              style="-fx-background-color: #1e90ff;">
+
+            <padding>
+                <Insets top="15" right="15" bottom="15" left="15"/>
+            </padding>
+
+            <Label text="🚌 Bus Ticket Booking System"
+                   style="-fx-font-size: 20px;
+                          -fx-text-fill: white;
+                          -fx-font-weight: bold;" />
+
+            <HBox alignment="CENTER_RIGHT" spacing="10" HBox.hgrow="ALWAYS">
+                <Label fx:id="welcomeLabel"
+                       text="Welcome, User"
+                       style="-fx-text-fill: white;
+                              -fx-font-size: 14px;" />
+            </HBox>
+        </HBox>
+    </top>
+
+    <!-- ===== CENTER DASHBOARD ===== -->
+    <center>
+        <GridPane alignment="CENTER" hgap="30" vgap="30">
+
+            <padding>
+                <Insets top="40" right="40" bottom="40" left="40"/>
+            </padding>
+
+            <Button text="🔍 Search Buses"
+                    prefWidth="200"
+                    prefHeight="60"
+                    onAction="#handleSearchBuses"/>
+
+            <Button text="🎟 Book Ticket"
+                    prefWidth="200"
+                    prefHeight="60"
+                    GridPane.columnIndex="1"
+                    onAction="#handleBookTicket"/>
+
+            <Button text="📄 Booking History"
+                    prefWidth="200"
+                    prefHeight="60"
+                    GridPane.rowIndex="1"
+                    onAction="#handleBookingHistory"/>
+
+            <Button text="🚪 Logout"
+                    prefWidth="200"
+                    prefHeight="60"
+                    GridPane.rowIndex="1"
+                    GridPane.columnIndex="1"
+                    onAction="#handleLogout"
+                    style="-fx-background-color: #dc143c;
+                           -fx-text-fill: white;"/>
+        </GridPane>
+    </center>
+
+    <!-- ===== FOOTER ===== -->
+    <bottom>
+        <VBox alignment="CENTER">
+
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <Label text="© 2026 Bus Ticket Booking System"
+                   style="-fx-text-fill: #555;" />
+        </VBox>
+    </bottom>
+
+</BorderPane>

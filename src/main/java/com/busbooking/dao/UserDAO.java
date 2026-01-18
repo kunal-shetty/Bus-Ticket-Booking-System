@@ -1,21 +1,34 @@
 package com.busbooking.dao;
 
-import com.busbooking.model.User;
 import com.busbooking.util.DBConnection;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class UserDAO {
 
-    public boolean login(String email, String password) throws SQLException {
-        String sql = "SELECT * FROM users WHERE email=? AND password=?";
-        PreparedStatement ps =
-                DBConnection.getConnection().prepareStatement(sql);
+    // ===== AUTHENTICATE USER =====
+    public ResultSet authenticate(String email, String password) {
 
-        ps.setString(1, email);
-        ps.setString(2, password);
+        String sql = """
+            SELECT user_id, name
+            FROM users
+            WHERE email = ? AND password = ?
+        """;
 
-        ResultSet rs = ps.executeQuery();
-        return rs.next();
+        try {
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            ps.setString(1, email);
+            ps.setString(2, password);
+
+            return ps.executeQuery();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
