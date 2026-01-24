@@ -6,6 +6,7 @@ import com.busbooking.util.DBConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,14 +19,14 @@ public class BusDAO {
         String sql = "SELECT * FROM buses";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 buses.add(mapBus(rs));
             }
 
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return buses;
@@ -36,13 +37,13 @@ public class BusDAO {
 
         List<Bus> buses = new ArrayList<>();
         String sql = """
-            SELECT * FROM buses
-            WHERE LOWER(source) = LOWER(?)
-            AND LOWER(destination) = LOWER(?)
-        """;
+                    SELECT * FROM buses
+                    WHERE LOWER(source) = LOWER(?)
+                    AND LOWER(destination) = LOWER(?)
+                """;
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, source);
             ps.setString(2, destination);
@@ -52,20 +53,19 @@ public class BusDAO {
                 buses.add(mapBus(rs));
             }
 
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return buses;
     }
 
     // ===== HELPER =====
-    private Bus mapBus(ResultSet rs) throws Exception {
+    private Bus mapBus(ResultSet rs) throws SQLException {
         return new Bus(
                 rs.getInt("bus_id"),
                 rs.getString("bus_number"),
                 rs.getString("source"),
                 rs.getString("destination"),
-                rs.getInt("total_seats")
-        );
+                rs.getInt("total_seats"));
     }
 }

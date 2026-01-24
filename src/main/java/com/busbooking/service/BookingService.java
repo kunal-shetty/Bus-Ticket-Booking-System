@@ -13,29 +13,30 @@ public class BookingService {
     private final SeatDAO seatDAO = new SeatDAO();
 
     public int bookSeat(int userId,
-                        int busId,
-                        int seatNumber,
-                        LocalDate travelDate) {
+            int busId,
+            int seatNumber,
+            LocalDate travelDate) {
 
         try (Connection conn = DBConnection.getConnection()) {
 
             conn.setAutoCommit(false);
 
-            // Create booking
-            int bookingId = bookingDAO.createBooking(
-                    userId, busId, seatNumber, travelDate
-            );
+            try {
+                // Create booking
+                int bookingId = bookingDAO.createBooking(
+                        conn, userId, busId, seatNumber, travelDate);
 
-            if (bookingId == -1) {
+                // Mark seat booked
+                seatDAO.markSeatBooked(conn, busId, seatNumber);
+
+                conn.commit();
+                return bookingId;
+
+            } catch (Exception e) {
                 conn.rollback();
-                return -1;
+                e.printStackTrace();
+                throw e; // Rethrow or handle gracefully
             }
-
-            // Mark seat booked
-            seatDAO.markSeatBooked(busId, seatNumber);
-
-            conn.commit();
-            return bookingId;
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,7 +1,10 @@
 {
-    "java.project.sourcePaths": [
-        "src/main/java",
-        "lib"
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "lib/javafx/lib/*.jar"
     ],
-    "java.project.referencedLibraries": []
+    "java.project.sourcePaths": [
+        "src/main/java"
+    ],
+    "java.configuration.updateBuildConfiguration": "automatic"
 }

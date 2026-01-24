@@ -1,7 +1,9 @@
 package com.busbooking.service;
 
 import com.busbooking.dao.SeatDAO;
+import com.busbooking.util.DBConnection;
 
+import java.sql.Connection;
 import java.util.Map;
 
 public class SeatService {
@@ -13,6 +15,10 @@ public class SeatService {
     }
 
     public void markSeatBooked(int busId, int seatNumber) {
-        seatDAO.markSeatBooked(busId, seatNumber);
+        try (Connection conn = DBConnection.getConnection()) {
+            seatDAO.markSeatBooked(conn, busId, seatNumber);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

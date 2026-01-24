@@ -1,4 +1,4 @@
-CREATE DATABSE bus_ticket_booking_db;
+CREATE DATABASE IF NOT EXISTS bus_ticket_booking_db;
 
 USE bus_ticket_booking_db;
 

@@ -2,8 +2,6 @@ package com.busbooking.service;
 
 import com.busbooking.dao.UserDAO;
 
-import java.sql.ResultSet;
-
 public class AuthService {
 
     private final UserDAO userDAO = new UserDAO();
@@ -11,13 +9,10 @@ public class AuthService {
     public AuthResult login(String email, String password) {
 
         try {
-            ResultSet rs = userDAO.authenticate(email, password);
+            com.busbooking.model.User user = userDAO.authenticate(email, password);
 
-            if (rs != null && rs.next()) {
-                int userId = rs.getInt("user_id");
-                String name = rs.getString("name");
-
-                return new AuthResult(true, userId, name);
+            if (user != null) {
+                return new AuthResult(true, user.getUserId(), user.getName());
             }
 
         } catch (Exception e) {

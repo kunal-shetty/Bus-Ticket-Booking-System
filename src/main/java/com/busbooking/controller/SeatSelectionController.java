@@ -1,5 +1,6 @@
 package com.busbooking.controller;
 
+import com.busbooking.service.SeatService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -9,24 +10,21 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.time.LocalDate;
+import java.util.Map;
 
 public class SeatSelectionController {
 
     // ===== FXML =====
-    @FXML private GridPane seatGrid;
-    @FXML private Label busInfoLabel;
-    @FXML private Label selectedSeatLabel;
+    @FXML
+    private GridPane seatGrid;
+    @FXML
+    private Label busInfoLabel;
+    @FXML
+    private Label selectedSeatLabel;
 
-    // ===== DB CONFIG =====
-    private static final String URL =
-            "jdbc:mysql://localhost:3306/bus_ticket_booking_db?useSSL=false&serverTimezone=UTC";
-    private static final String USER = "root";
-    private static final String PASSWORD = "Kunal1234";
+    // ===== SERVICES =====
+    private final SeatService seatService = new SeatService();
 
     // ===== SESSION / CONTEXT =====
     private int userId;
@@ -39,10 +37,10 @@ public class SeatSelectionController {
 
     // ===== CALLED FROM SearchBusController =====
     public void setBookingContext(int userId,
-                                  int busId,
-                                  String busNumber,
-                                  String source,
-                                  String destination) {
+            int busId,
+            String busNumber,
+            String source,
+            String destination) {
 
         this.userId = userId;
         this.busId = busId;
@@ -51,8 +49,7 @@ public class SeatSelectionController {
         this.destination = destination;
 
         busInfoLabel.setText(
-                "Bus: " + busNumber + " | " + source + " → " + destination
-        );
+                "Bus: " + busNumber + " | " + source + " → " + destination);
 
         loadSeatsFromDatabase();
     }
@@ -62,47 +59,32 @@ public class SeatSelectionController {
 
         seatGrid.getChildren().clear();
 
-        String sql = """
-            SELECT seat_number, is_booked
-            FROM seats
-            WHERE bus_id = ?
-            ORDER BY seat_number
-        """;
+        Map<Integer, Boolean> seats = seatService.getSeatAvailability(busId);
 
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        int col = 0;
+        int row = 0;
 
-            ps.setInt(1, busId);
-            ResultSet rs = ps.executeQuery();
+        for (Map.Entry<Integer, Boolean> entry : seats.entrySet()) {
+            int seatNumber = entry.getKey();
+            boolean isBooked = entry.getValue();
 
-            int col = 0;
-            int row = 0;
+            Button seatBtn = new Button(String.valueOf(seatNumber));
+            seatBtn.setMinSize(45, 40);
 
-            while (rs.next()) {
-                int seatNumber = rs.getInt("seat_number");
-                boolean isBooked = rs.getBoolean("is_booked");
-
-                Button seatBtn = new Button(String.valueOf(seatNumber));
-                seatBtn.setMinSize(45, 40);
-
-                if (isBooked) {
-                    seatBtn.getStyleClass().add("seat-booked");
-                    seatBtn.setDisable(true);
-                } else {
-                    seatBtn.getStyleClass().add("seat-available");
-                    seatBtn.setOnAction(e -> selectSeat(seatBtn, seatNumber));
-                }
-
-                seatGrid.add(seatBtn, col, row);
-                col++;
-                if (col == 4) { // 4 seats per row
-                    col = 0;
-                    row++;
-                }
+            if (isBooked) {
+                seatBtn.getStyleClass().add("seat-booked");
+                seatBtn.setDisable(true);
+            } else {
+                seatBtn.getStyleClass().add("seat-available");
+                seatBtn.setOnAction(e -> selectSeat(seatBtn, seatNumber));
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
+            seatGrid.add(seatBtn, col, row);
+            col++;
+            if (col == 4) { // 4 seats per row
+                col = 0;
+                row++;
+            }
         }
     }
 
@@ -112,7 +94,7 @@ public class SeatSelectionController {
         // Clear previous selection
         seatGrid.getChildren().forEach(node -> {
             if (node instanceof Button btn &&
-                btn.getStyleClass().contains("seat-selected")) {
+                    btn.getStyleClass().contains("seat-selected")) {
                 btn.getStyleClass().remove("seat-selected");
                 btn.getStyleClass().add("seat-available");
             }
@@ -136,8 +118,7 @@ public class SeatSelectionController {
 
         try {
             FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/fxml/booking_confirmation.fxml")
-            );
+                    getClass().getResource("/fxml/booking_confirmation.fxml"));
             Parent root = loader.load();
 
             BookingController controller = loader.getController();
@@ -145,14 +126,12 @@ public class SeatSelectionController {
                     userId,
                     busId,
                     selectedSeatNumber,
-                    LocalDate.now()
-            );
+                    LocalDate.now());
 
             Stage stage = (Stage) seatGrid.getScene().getWindow();
             Scene scene = new Scene(root);
             scene.getStylesheets().add(
-                    getClass().getResource("/css/style.css").toExternalForm()
-            );
+                    getClass().getResource("/css/style.css").toExternalForm());
 
             stage.setScene(scene);
             stage.show();
@@ -166,8 +145,7 @@ public class SeatSelectionController {
     @FXML
     private void handleBack() {
         try {
-            FXMLLoader loader =
-                    new FXMLLoader(getClass().getResource("/fxml/search_bus.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/search_bus.fxml"));
             Parent root = loader.load();
 
             SearchBusController controller = loader.getController();
@@ -176,8 +154,7 @@ public class SeatSelectionController {
             Stage stage = (Stage) seatGrid.getScene().getWindow();
             Scene scene = new Scene(root);
             scene.getStylesheets().add(
-                    getClass().getResource("/css/style.css").toExternalForm()
-            );
+                    getClass().getResource("/css/style.css").toExternalForm());
 
             stage.setScene(scene);
             stage.show();

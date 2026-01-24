@@ -10,23 +10,20 @@
 
     <!-- ===== TOP HEADER ===== -->
     <top>
-        <HBox alignment="CENTER_LEFT" spacing="20"
-              style="-fx-background-color: #1e90ff;">
+        <HBox alignment="CENTER_LEFT" spacing="20" styleClass="header">
 
             <padding>
-                <Insets top="15" right="15" bottom="15" left="15"/>
+                <Insets top="20" right="20" bottom="20" left="20"/>
             </padding>
 
             <Label text="🚌 Bus Ticket Booking System"
-                   style="-fx-font-size: 20px;
-                          -fx-text-fill: white;
-                          -fx-font-weight: bold;" />
+                   styleClass="header-label" />
 
             <HBox alignment="CENTER_RIGHT" spacing="10" HBox.hgrow="ALWAYS">
                 <Label fx:id="welcomeLabel"
                        text="Welcome, User"
-                       style="-fx-text-fill: white;
-                              -fx-font-size: 14px;" />
+                       styleClass="info-label"
+                       style="-fx-text-fill: white;"/>
             </HBox>
         </HBox>
     </top>
@@ -40,30 +37,36 @@
             </padding>
 
             <Button text="🔍 Search Buses"
-                    prefWidth="200"
-                    prefHeight="60"
+                    prefWidth="220"
+                    prefHeight="80"
+                    styleClass="primary-button"
+                    style="-fx-font-size: 16px;"
                     onAction="#handleSearchBuses"/>
 
             <Button text="🎟 Book Ticket"
-                    prefWidth="200"
-                    prefHeight="60"
+                    prefWidth="220"
+                    prefHeight="80"
                     GridPane.columnIndex="1"
+                    styleClass="success-button"
+                    style="-fx-font-size: 16px;"
                     onAction="#handleBookTicket"/>
 
             <Button text="📄 Booking History"
-                    prefWidth="200"
-                    prefHeight="60"
+                    prefWidth="220"
+                    prefHeight="80"
                     GridPane.rowIndex="1"
+                    styleClass="secondary-button"
+                    style="-fx-font-size: 16px;"
                     onAction="#handleBookingHistory"/>
 
             <Button text="🚪 Logout"
-                    prefWidth="200"
-                    prefHeight="60"
+                    prefWidth="220"
+                    prefHeight="80"
                     GridPane.rowIndex="1"
                     GridPane.columnIndex="1"
                     onAction="#handleLogout"
-                    style="-fx-background-color: #dc143c;
-                           -fx-text-fill: white;"/>
+                    styleClass="danger-button"
+                    style="-fx-font-size: 16px;"/>
         </GridPane>
     </center>
 

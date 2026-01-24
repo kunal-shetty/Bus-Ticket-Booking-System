@@ -40,7 +40,6 @@ public class DashboardController {
     @FXML
     private void handleBookingHistory(ActionEvent event) {
         navigate(event, "/fxml/booking_history.fxml");
-        // booking_history.fxml can be implemented next
     }
 
     @FXML
@@ -63,12 +62,13 @@ public class DashboardController {
 
             if (controller instanceof SearchBusController searchBusController) {
                 searchBusController.setUserSession(loggedInUserId);
+            } else if (controller instanceof BookingHistoryController bookingHistoryController) {
+                bookingHistoryController.setUserSession(loggedInUserId);
             }
 
             Scene scene = new Scene(root);
             scene.getStylesheets().add(
-                    getClass().getResource("/css/style.css").toExternalForm()
-            );
+                    getClass().getResource("/css/style.css").toExternalForm());
 
             stage.setScene(scene);
             stage.show();
