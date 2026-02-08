@@ -77,6 +77,9 @@ public class BookingDAO {
                 booking.setBusId(rs.getInt("bus_id"));
                 booking.setSeatNumber(rs.getInt("seat_number"));
                 booking.setBookingDate(rs.getDate("booking_date").toLocalDate());
+                booking.setDestination(rs.getString("destination"));
+                booking.setSource(rs.getString("source"));
+                booking.setBusNumber(rs.getString("bus_number"));
 
                 // If Booking class doesn't have these fields, we might need to extend it.
                 // Assuming standard getters/setters.

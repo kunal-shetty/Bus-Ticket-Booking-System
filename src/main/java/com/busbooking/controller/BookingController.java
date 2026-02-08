@@ -60,7 +60,7 @@ public class BookingController {
                 bookingIdLabel.setText("BK" + bookingId);
                 seatNumberLabel.setText(String.valueOf(seatNumber));
                 travelDateLabel.setText(travelDate.toString());
-                fareLabel.setText("₹500");
+                fareLabel.setText("₹400");
 
                 // Note: In a real application, we would fetch and display the bus details here.
                 // For now, the booking ID and Seat Number are sufficient confimation.

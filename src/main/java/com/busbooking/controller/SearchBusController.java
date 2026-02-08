@@ -62,7 +62,21 @@ public class SearchBusController {
     // ===== SESSION SETTER =====
     public void setUserSession(int userId) {
         this.loggedInUserId = userId;
+        loadBuses();
     }
+
+    @FXML
+    private void loadBuses() {
+
+        List<Bus> buses = busDAO.getAllBuses();
+
+            messageLabel.setText("");
+            ObservableList<Bus> busList =
+                    FXCollections.observableArrayList(buses);
+            busTable.setItems(busList);
+        }
+    
+
 
     // ===== SEARCH HANDLER =====
     @FXML

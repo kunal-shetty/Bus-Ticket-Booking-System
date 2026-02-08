@@ -55,9 +55,7 @@
 
             <Label fx:id="messageLabel" style="-fx-text-fill: red;"/>
 
-            <Hyperlink text="New user? Register here"
-                       onAction="#handleRegister"/>
-
+            
         </VBox>
     </center>
 
