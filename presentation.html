@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Ticket Booking System — Presentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        /* ═══════════════════════════════════════════
+           RESET & CUSTOM PROPERTIES
+           ═══════════════════════════════════════════ */
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --accent: #818cf8;
+            --accent-bright: #a5b4fc;
+            --accent-deep: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.30);
+            --pink: #f472b6;
+            --pink-glow: rgba(244, 114, 182, 0.20);
+            --bg: #07070f;
+            --card-bg: rgba(255, 255, 255, 0.035);
+            --card-border: rgba(255, 255, 255, 0.06);
+            --card-border-hover: rgba(129, 140, 248, 0.25);
+            --text: #eeeef5;
+            --text-sub: #9d9db8;
+            --text-dim: #5e5e78;
+            --radius: 20px;
+        }
+
+        /* ═══════════════════════════════════════════
+           BODY & BACKGROUND
+           ═══════════════════════════════════════════ */
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Radial gradient depth */
+        .bg-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse 80% 60% at 50% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 80% 100%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse 50% 40% at 10% 80%, rgba(244, 114, 182, 0.04) 0%, transparent 50%);
+        }
+
+        /* Floating orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.12;
+            pointer-events: none;
+            z-index: 0;
+            animation: orbFloat 25s ease-in-out infinite alternate;
+        }
+
+        .orb-1 {
+            width: 700px;
+            height: 700px;
+            background: #6366f1;
+            top: -20%;
+            left: -10%;
+        }
+
+        .orb-2 {
+            width: 500px;
+            height: 500px;
+            background: #8b5cf6;
+            bottom: -15%;
+            right: -8%;
+            animation-delay: -10s;
+        }
+
+        .orb-3 {
+            width: 350px;
+            height: 350px;
+            background: #ec4899;
+            top: 40%;
+            left: 60%;
+            animation-delay: -18s;
+            opacity: 0.06;
+        }
+
+        @keyframes orbFloat {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            50% {
+                transform: translate(50px, -40px) scale(1.08);
+            }
+
+            100% {
+                transform: translate(-30px, 30px) scale(0.95);
+            }
+        }
+
+        /* Dot grid */
+        .dot-grid {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.3;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* ═══════════════════════════════════════════
+           PROGRESS BAR
+           ═══════════════════════════════════════════ */
+        .progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            z-index: 200;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 12.5%;
+            background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright), var(--pink));
+            transition: width 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        /* ═══════════════════════════════════════════
+           PRESENTATION CONTAINER
+           ═══════════════════════════════════════════ */
+        .deck {
+            width: 1920px;
+            height: 1080px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            z-index: 10;
+        }
+
+        /* ═══════════════════════════════════════════
+           SLIDE BASE
+           ═══════════════════════════════════════════ */
+        .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            visibility: hidden;
+            padding: 90px 130px;
+            display: flex;
+            flex-direction: column;
+            pointer-events: none;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
+        }
+
+        /* ═══════════════════════════════════════════
+           TYPOGRAPHY
+           ═══════════════════════════════════════════ */
+        .label {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 18px;
+            opacity: 0.85;
+        }
+
+        .heading {
+            font-size: 68px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+
+        .subheading {
+            font-size: 30px;
+            font-weight: 300;
+            color: var(--text-sub);
+            margin-bottom: 50px;
+            line-height: 1.5;
+            max-width: 900px;
+        }
+
+        /* Hero title — animated gradient */
+        .hero-title {
+            font-size: 100px;
+            font-weight: 900;
+            line-height: 1.05;
+            text-align: center;
+            background: linear-gradient(135deg, #fff 15%, var(--accent-bright) 45%, #c084fc 65%, var(--pink) 90%);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 6s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        /* Glow line */
+        .glow-line {
+            width: 100px;
+            height: 4px;
+            border-radius: 4px;
+            margin: 28px auto;
+            background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright), var(--pink));
+            box-shadow: 0 0 24px var(--accent-glow), 0 0 60px rgba(99, 102, 241, 0.1);
+        }
+
+        /* Thank you title */
+        .thankyou {
+            font-size: 110px;
+            font-weight: 900;
+            text-align: center;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-bright) 35%, #c084fc 60%, var(--pink) 100%);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 5s ease-in-out infinite;
+        }
+
+        /* ═══════════════════════════════════════════
+           LAYOUT
+           ═══════════════════════════════════════════ */
+        .split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            flex: 1;
+            align-items: center;
+        }
+
+        .triple {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 36px;
+            flex: 1;
+        }
+
+        .stack {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        /* ═══════════════════════════════════════════
+           GLASS CARDS
+           ═══════════════════════════════════════════ */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            padding: 44px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+                border-color 0.4s ease,
+                box-shadow 0.4s ease;
+        }
+
+        /* Top shine line */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 5%, rgba(255, 255, 255, 0.08) 50%, transparent 95%);
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            border-color: var(--card-border-hover);
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35), 0 0 50px var(--accent-glow);
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--accent-deep), #8b5cf6);
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        .card-heading {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent-bright);
+            margin-bottom: 18px;
+        }
+
+        .card-body {
+            font-size: 22px;
+            line-height: 1.8;
+            color: var(--text-sub);
+        }
+
+        /* ═══════════════════════════════════════════
+           BADGES
+           ═══════════════════════════════════════════ */
+        .badge-row {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .badge {
+            padding: 12px 28px;
+            border-radius: 100px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.08));
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            color: var(--accent-bright);
+            font-size: 22px;
+            font-weight: 600;
+            transition: all 0.35s ease;
+            animation: badgeFloat 4s ease-in-out infinite;
+        }
+
+        .badge:nth-child(2) {
+            animation-delay: -0.8s;
+        }
+
+        .badge:nth-child(3) {
+            animation-delay: -1.6s;
+        }
+
+        .badge:nth-child(4) {
+            animation-delay: -2.4s;
+        }
+
+        .badge:nth-child(5) {
+            animation-delay: -3.2s;
+        }
+
+        .badge:nth-child(6) {
+            animation-delay: -4.0s;
+        }
+
+        @keyframes badgeFloat {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .badge:hover {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.15));
+            box-shadow: 0 4px 24px var(--accent-glow);
+            transform: translateY(-3px) scale(1.03);
+        }
+
+        /* Future badges — larger */
+        .future-badge {
+            padding: 14px 28px;
+            border-radius: 100px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.08));
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            color: var(--accent-bright);
+            font-size: 24px;
+            font-weight: 500;
+            display: inline-block;
+            margin: 8px;
+            transition: all 0.35s ease;
+            animation: badgeFloat 5s ease-in-out infinite;
+        }
+
+        .future-badge:nth-child(2) {
+            animation-delay: -1s;
+        }
+
+        .future-badge:nth-child(3) {
+            animation-delay: -2s;
+        }
+
+        .future-badge:nth-child(4) {
+            animation-delay: -3s;
+        }
+
+        .future-badge:nth-child(5) {
+            animation-delay: -4s;
+        }
+
+        .future-badge:nth-child(6) {
+            animation-delay: -5s;
+        }
+
+        .future-badge:hover {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.2));
+            box-shadow: 0 6px 30px var(--accent-glow);
+            transform: translateY(-4px);
+        }
+
+        /* ═══════════════════════════════════════════
+           LISTS
+           ═══════════════════════════════════════════ */
+        .flow-list {
+            list-style: none;
+            counter-reset: flow;
+        }
+
+        .flow-list li {
+            counter-increment: flow;
+            margin-bottom: 24px;
+            font-size: 26px;
+            line-height: 1.65;
+            padding-left: 56px;
+            position: relative;
+            color: var(--text-sub);
+        }
+
+        .flow-list li::before {
+            content: counter(flow);
+            position: absolute;
+            left: 0;
+            top: 2px;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent-deep), #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+            text-align: center;
+            line-height: 36px;
+            box-shadow: 0 2px 12px var(--accent-glow);
+        }
+
+        .bullet-list {
+            list-style: none;
+        }
+
+        .bullet-list li {
+            margin-bottom: 18px;
+            font-size: 24px;
+            line-height: 1.7;
+            padding-left: 30px;
+            position: relative;
+            color: var(--text-sub);
+        }
+
+        .bullet-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 12px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        /* ═══════════════════════════════════════════
+           DB CARDS
+           ═══════════════════════════════════════════ */
+        .db-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 32px;
+            backdrop-filter: blur(8px);
+            margin-bottom: 24px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .db-card:hover {
+            border-color: var(--card-border-hover);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2), 0 0 20px var(--accent-glow);
+        }
+
+        .db-card-name {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent-bright);
+            margin-bottom: 12px;
+        }
+
+        .db-card-fields {
+            font-size: 22px;
+            color: var(--text-sub);
+            line-height: 1.7;
+        }
+
+        .pk {
+            color: var(--pink);
+            font-weight: 700;
+            font-size: 16px;
+            letter-spacing: 1px;
+        }
+
+        .fk {
+            color: #34d399;
+            font-weight: 700;
+            font-size: 16px;
+            letter-spacing: 1px;
+        }
+
+        /* ═══════════════════════════════════════════
+           IMAGE CONTAINER
+           ═══════════════════════════════════════════ */
+        .img-box {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 40px rgba(99, 102, 241, 0.08);
+        }
+
+        .img-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        /* ═══════════════════════════════════════════
+           NAVIGATION
+           ═══════════════════════════════════════════ */
+        .nav-bar {
+            position: fixed;
+            bottom: 36px;
+            right: 44px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 200;
+        }
+
+        .nav-btn {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-sub);
+            font-size: 20px;
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            backdrop-filter: blur(8px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.3);
+            color: var(--accent-bright);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-btn:active {
+            transform: translateY(0) scale(0.97);
+        }
+
+        /* Fullscreen button */
+        .fs-btn {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-dim);
+            font-size: 18px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+        }
+
+        .fs-btn:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: rgba(99, 102, 241, 0.2);
+            color: var(--accent);
+        }
+
+        /* Slide info */
+        .slide-info {
+            position: fixed;
+            bottom: 42px;
+            left: 48px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            z-index: 200;
+        }
+
+        .slide-num {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+        }
+
+        .slide-num span {
+            color: var(--accent);
+            font-weight: 800;
+            transition: all 0.3s ease;
+        }
+
+        /* Keyboard hint */
+        .kb-hint {
+            position: fixed;
+            bottom: 44px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 15px;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0.5;
+            transition: opacity 0.3s ease;
+        }
+
+        .kb-hint:hover {
+            opacity: 0.9;
+        }
+
+        .kb-key {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* ═══════════════════════════════════════════
+           ANIMATE-IN TARGETS
+           ═══════════════════════════════════════════ */
+        .a {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        /* ═══════════════════════════════════════════
+           STAT CARD
+           ═══════════════════════════════════════════ */
+        .stat {
+            text-align: center;
+            padding: 32px;
+        }
+
+        .stat-num {
+            font-size: 56px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-bright), #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-lbl {
+            font-size: 20px;
+            color: var(--text-dim);
+            margin-top: 6px;
+        }
+
+        /* ═══════════════════════════════════════════
+           PRINT
+           ═══════════════════════════════════════════ */
+        @media print {
+            body {
+                background: #fff;
+                color: #000;
+            }
+
+            .bg-layer,
+            .orb,
+            .dot-grid,
+            .progress,
+            .nav-bar,
+            .slide-info,
+            .kb-hint {
+                display: none;
+            }
+
+            .deck {
+                transform: none;
+                position: relative;
+                top: auto;
+                left: auto;
+                height: auto;
+            }
+
+            .slide {
+                position: relative;
+                opacity: 1;
+                visibility: visible;
+                page-break-after: always;
+                height: auto;
+                padding: 40px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Background layers -->
+    <div class="bg-layer"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="dot-grid"></div>
+
+    <!-- Progress -->
+    <div class="progress">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="deck">
+
+        <!-- ============ SLIDE 1 — TITLE ============ -->
+        <div class="slide active" data-slide="1">
+            <div
+                style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
+
+                <div class="a">
+                    <h1 class="hero-title">Bus Ticket<br>Booking System</h1>
+                </div>
+                <div class="a">
+                    <div class="glow-line"></div>
+                </div>
+                <div class="a">
+                    <p
+                        style="font-size:28px; color:var(--text-sub); max-width:750px; line-height:1.6; margin-bottom:48px;">
+                        A full-featured desktop application for searching buses, selecting seats, and booking tickets —
+                        built with modern Java.
+                    </p>
+                </div>
+                <div class="a">
+                    <p
+                        style="font-size:20px; color:var(--text-dim); letter-spacing:3px; margin-bottom:10px; text-transform:uppercase;">
+                        Developed By</p>
+                    <p style="font-size:38px; font-weight:700; color:#fff;">Kunal Shetty &nbsp;·&nbsp; Tej Panchal
+                        &nbsp;·&nbsp; </p>
+                </div>
+                <div class="a" style="margin-top:52px;">
+                    <div class="badge-row">
+                        <span class="badge">Java 21</span>
+                        <span class="badge">JavaFX</span>
+                        <span class="badge">JDBC</span>
+                        <span class="badge">MySQL 8.0</span>
+                        <span class="badge">MVC Pattern</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 2 — INTRODUCTION ============ -->
+        <div class="slide" data-slide="2">
+            <div class="a">
+                <p class="label">02 — Introduction</p>
+                <h2 class="heading">Why This Project?</h2>
+            </div>
+            <div class="split">
+                <div class="card a">
+                    <div class="card-icon">!</div>
+                    <div class="card-heading">Problem Statement</div>
+                    <div class="card-body">
+                        <p style="margin-bottom:22px;">Conventional bus ticketing across India relies on manual
+                            counter-based systems that create major operational issues:</p>
+                        <ul class="bullet-list">
+                            <li><strong style="color:#fff;">Double Bookings</strong> — Same seat sold to multiple
+                                passengers without real-time tracking.</li>
+                            <li><strong style="color:#fff;">No Visibility</strong> — Passengers can't check seat
+                                availability before visiting the counter.</li>
+                            <li><strong style="color:#fff;">Paper Records</strong> — Handwritten logs are fragile and
+                                impossible to audit efficiently.</li>
+                            <li><strong style="color:#fff;">Slow Processing</strong> — Each booking takes minutes of
+                                manual entry, creating long queues.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card a">
+                    <div class="card-icon">✦</div>
+                    <div class="card-heading">Our Solution</div>
+                    <div class="card-body">
+                        <p style="margin-bottom:22px;">A <strong style="color:#fff;">complete digital platform</strong>
+                            that eliminates every pain point of the manual process:</p>
+                        <ul class="bullet-list">
+                            <li><strong style="color:#fff;">Instant Authentication</strong> — Secure login and
+                                registration via MySQL database.</li>
+                            <li><strong style="color:#fff;">Visual Seat Map</strong> — Realistic 2+2 bus layout showing
+                                availability at a glance.</li>
+                            <li><strong style="color:#fff;">Multi-Seat Booking</strong> — Select multiple seats in one
+                                atomic transaction.</li>
+                            <li><strong style="color:#fff;">Persistent History</strong> — Every booking is permanently
+                                stored and retrievable.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 3 — PROCESS FLOW ============ -->
+        <div class="slide" data-slide="3">
+            <div class="a">
+                <p class="label">03 — Process</p>
+                <h2 class="heading">Application Workflow</h2>
+                <p class="subheading">The complete user journey from login to ticket confirmation</p>
+            </div>
+            <div class="split">
+                <div class="card a" style="padding:40px;">
+                    <div class="card-heading" style="margin-bottom:24px;">Step-by-Step Flow</div>
+                    <ul class="flow-list">
+                        <li><strong style="color:#fff;">Authentication</strong> — Secure login & registration with
+                            validation.</li>
+
+                        <li><strong style="color:#fff;">Dashboard & Search</strong> — Central hub to search and filter
+                            bus routes.</li>
+
+                        <li><strong style="color:#fff;">Seat Selection</strong> — Visual 2+2 layout with multi-seat
+                            toggle selection.</li>
+
+                        <li><strong style="color:#fff;">Booking & Confirmation</strong> — Atomic transaction secures
+                            seats and generates booking details instantly.</li>
+
+                    </ul>
+                </div>
+                <div class="stack">
+                    <div class="card a stat">
+                        <div class="stat-num">15+</div>
+                        <div class="stat-lbl">Indian Bus Routes</div>
+                    </div>
+                    <div class="card a stat">
+                        <div class="stat-num">7</div>
+                        <div class="stat-lbl">Application Screens</div>
+                    </div>
+                    <div class="card a stat">
+                        <div class="stat-num">4</div>
+                        <div class="stat-lbl">Database Tables</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 4 — FILES & LIBRARIES ============ -->
+        <div class="slide" data-slide="4">
+            <div class="a">
+                <p class="label">04 — Architecture</p>
+                <h2 class="heading">Files & Libraries</h2>
+                <p class="subheading">30+ source files organized across a layered MVC architecture</p>
+            </div>
+            <div class="triple">
+                <div class="card a">
+                    <div class="card-icon">⚡</div>
+                    <div class="card-heading">Technology Stack</div>
+                    <div class="card-body">
+                        <ul class="bullet-list">
+                            <li><strong style="color:#fff;">Java 21 LTS</strong> — Type safety, modern features,
+                                long-term support.</li>
+                            <li><strong style="color:#fff;">JavaFX 21</strong> — Modern GUI toolkit with FXML and CSS
+                                styling.</li>
+                            <li><strong style="color:#fff;">JDBC API</strong> — Direct database connectivity with
+                                PreparedStatements.</li>
+                            <li><strong style="color:#fff;">MySQL 8.0</strong> — ACID-compliant relational database.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card a">
+                    <div class="card-icon">📂</div>
+                    <div class="card-heading">Component Breakdown</div>
+                    <div class="card-body">
+                        <ul class="bullet-list">
+                            <li><strong style="color:#fff;">7 Controllers</strong> — Handle UI events and screen
+                                navigation.</li>
+                            <li><strong style="color:#fff;">4 Services</strong> — Auth, Booking, Seat, and Session
+                                management.</li>
+                            <li><strong style="color:#fff;">4 DAOs</strong> — Encapsulate all SQL queries (CRUD
+                                operations).</li>
+                            <li><strong style="color:#fff;">4 Models</strong> — POJOs: User, Bus, Seat, Booking.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card a">
+                    <div class="card-icon">🎨</div>
+                    <div class="card-heading">Resource Files</div>
+                    <div class="card-body">
+                        <ul class="bullet-list">
+                            <li><strong style="color:#fff;">7 FXML Files</strong> — Declarative layouts for every
+                                screen.</li>
+                            <li><strong style="color:#fff;">CSS Stylesheet</strong> — Premium dark theme with design
+                                tokens.</li>
+                            <li><strong style="color:#fff;">SQL Scripts</strong> — Schema creation and seed data for 15
+                                routes.</li>
+                            <li><strong style="color:#fff;">compile.ps1</strong> — One-click build and run script.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 5 — MODULES ============ -->
+        <div class="slide" data-slide="5">
+            <div class="a">
+                <p class="label">05 — Modules</p>
+                <h2 class="heading">MVC Implementation</h2>
+                <p class="subheading">Clean separation of concerns across five distinct layers</p>
+            </div>
+            <div class="split">
+                <div class="stack">
+                    <div class="card a">
+                        <div class="card-heading">View Layer (FXML + CSS)</div>
+                        <div class="card-body">7 FXML screens define the UI declaratively. <code
+                                style="color:var(--accent);">style.css</code> applies the dark theme with indigo
+                            accents. Zero business logic in this layer — purely layout and styling.</div>
+                    </div>
+                    <div class="card a">
+                        <div class="card-heading">Controller Layer</div>
+                        <div class="card-body">Each screen has a dedicated controller handling button clicks, form
+                            submissions, and navigation. Controllers call Services — never DAOs directly — maintaining
+                            clean dependencies.</div>
+                    </div>
+                </div>
+                <div class="stack">
+                    <div class="card a">
+                        <div class="card-heading">Service Layer</div>
+                        <div class="card-body"><code style="color:var(--accent);">AuthService</code> handles
+                            login/register, <code style="color:var(--accent);">BookingService</code> manages atomic
+                            multi-seat booking, <code style="color:var(--accent);">SessionService</code> maintains
+                            global user state across screens.</div>
+                    </div>
+                    <div class="card a">
+                        <div class="card-heading">DAO + Model Layer</div>
+                        <div class="card-body">Data Access Objects encapsulate raw SQL with <code
+                                style="color:var(--accent);">PreparedStatement</code>. Models (<code
+                                style="color:var(--accent);">User</code>, <code style="color:var(--accent);">Bus</code>,
+                            <code style="color:var(--accent);">Seat</code>, <code
+                                style="color:var(--accent);">Booking</code>) are POJOs carrying data between layers.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 6 — CORE FEATURES ============ -->
+        <div class="slide" data-slide="6">
+            <div class="a">
+                <p class="label">06 — Features</p>
+                <h2 class="heading">Core Technical Features</h2>
+            </div>
+            <div class="triple">
+                <div class="card a">
+                    <div class="card-icon">🔐</div>
+                    <div class="card-heading">Secure Authentication</div>
+                    <div class="card-body">
+                        <ul class="bullet-list">
+                            <li>Email-based login and registration</li>
+                            <li>Global session management across all screens</li>
+                            <li>Email format and password validation</li>
+                            <li>Duplicate email detection on signup</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card a">
+                    <div class="card-icon">🎟</div>
+                    <div class="card-heading">Multi-Seat Booking</div>
+                    <div class="card-body">
+                        <ul class="bullet-list">
+                            <li>Visual 2+2 seat grid with aisle gap</li>
+                            <li>Toggle-select multiple seats at once</li>
+                            <li>Atomic transaction — all or nothing</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card a">
+                    <div class="card-icon">🎨</div>
+                    <div class="card-heading">Premium Dark UI</div>
+                    <div class="card-body">
+                        <ul class="bullet-list">
+                            <li>Indigo accent color palette</li>
+                            <li>CSS design token system</li>
+                            <li>Consistent styling across 7 screens</li>
+                            <li>Hover effects and visual feedback</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 7 — DATABASE ============ -->
+        <div class="slide" data-slide="7">
+            <div class="a">
+                <p class="label">07 — Database</p>
+                <h2 class="heading">Schema Design</h2>
+                <p class="subheading">Normalized to 3NF with foreign key constraints and cascade rules</p>
+            </div>
+            <div class="split">
+                <div class="stack">
+                    <div class="db-card a">
+                        <div class="db-card-name">⬡ users</div>
+                        <div class="db-card-fields"><span class="pk">PK</span> user_id (INT AUTO_INCREMENT)<br>name
+                            (VARCHAR) · email (VARCHAR, UNIQUE)<br>password (VARCHAR)</div>
+                    </div>
+                    <div class="db-card a">
+                        <div class="db-card-name">⬡ buses</div>
+                        <div class="db-card-fields"><span class="pk">PK</span> bus_id (INT AUTO_INCREMENT)<br>bus_number
+                            (VARCHAR) · source (VARCHAR)<br>destination (VARCHAR) · total_seats (INT)</div>
+                    </div>
+                </div>
+                <div class="stack">
+                    <div class="db-card a">
+                        <div class="db-card-name">⬡ seats</div>
+                        <div class="db-card-fields"><span class="pk">PK</span> seat_id (INT AUTO_INCREMENT)<br><span
+                                class="fk">FK</span> bus_id → buses(bus_id) CASCADE<br>seat_number (INT) · is_booked
+                            (BOOLEAN)</div>
+                    </div>
+                    <div class="db-card a">
+                        <div class="db-card-name">⬡ bookings</div>
+                        <div class="db-card-fields"><span class="pk">PK</span> booking_id (INT AUTO_INCREMENT)<br><span
+                                class="fk">FK</span> user_id → users(user_id) CASCADE<br><span class="fk">FK</span>
+                            bus_id → buses(bus_id) CASCADE<br>seat_number (INT) · booking_date (DATE)</div>
+                    </div>
+                    <div class="card a" style="padding:24px; text-align:center; margin-top:8px;">
+                        <p style="font-size:24px; color:var(--text-sub);">All foreign keys use <strong
+                                style="color:#fff;">ON DELETE CASCADE</strong> for referential integrity</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 8 — THANK YOU ============ -->
+        <div class="slide" data-slide="8">
+            <div
+                style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
+                <div class="a">
+                    <h1 class="thankyou">Thank You</h1>
+                </div>
+                <div class="a">
+                    <div class="glow-line" style="width:140px; margin:36px auto;"></div>
+                </div>
+                <div class="a">
+                    <p
+                        style="font-size:28px; color:var(--text-sub); max-width:850px; line-height:1.7; margin-bottom:52px;">
+                        We built a complete Bus Ticket Booking System with secure authentication, multi-seat selection,
+                        atomic database transactions, premium dark-themed UI, and clean MVC architecture.
+                    </p>
+                </div>
+                <div class="a">
+                    <p
+                        style="font-size:20px; font-weight:700; letter-spacing:4px; text-transform:uppercase; color:var(--accent); margin-bottom:28px;">
+                        Future Enhancements</p>
+                </div>
+                <div class="a" style="max-width:850px;">
+                    <span class="future-badge">📧 Email Confirmation</span>
+                    <span class="future-badge">📄 PDF E-Ticket</span>
+                    <span class="future-badge">💰 Dynamic Pricing</span>
+                </div>
+                <div class="a" style="margin-top:64px;">
+                    <p style="font-size:26px; color:var(--text-dim); font-style:italic;">Questions?</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Controls -->
+    <div class="slide-info">
+        <div class="slide-num"><span id="curNum">01</span> / 08</div>
+    </div>
+
+
+
+    <div class="nav-bar">
+        <button class="fs-btn" id="fsBtn" title="Fullscreen (F)">⛶</button>
+        <button class="nav-btn" id="prevBtn" title="Previous (←)">←</button>
+        <button class="nav-btn" id="nextBtn" title="Next (→)">→</button>
+    </div>
+
+    <script>
+        (() => {
+            /* ═══ State ═══ */
+            let cur = 1;
+            const total = 8;
+            const slides = document.querySelectorAll('.slide');
+            const progress = document.getElementById('progressFill');
+            const curNum = document.getElementById('curNum');
+            let transitioning = false;
+
+            /* ═══ Scale to fit ═══ */
+            function scale() {
+                const d = document.querySelector('.deck');
+                const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+                d.style.transform = `translate(-50%,-50%) scale(${s})`;
+            }
+            addEventListener('resize', scale);
+            scale();
+
+            /* ═══ Animate elements in ═══ */
+            function animateIn(slide) {
+                const items = slide.querySelectorAll('.a');
+                gsap.set(items, { opacity: 0, y: 20 });
+                gsap.to(items, {
+                    opacity: 1, y: 0,
+                    duration: 0.35,
+                    stagger: 0.05,
+                    ease: 'power3.out',
+                    delay: 0.05,
+                    onComplete: () => { transitioning = false; }
+                });
+            }
+
+            /* ═══ Show slide with direction ═══ */
+            function go(n) {
+                if (n < 1 || n > total || n === cur || transitioning) return;
+                transitioning = true;
+                const dir = n > cur ? 1 : -1;
+                const prev = document.querySelector(`[data-slide="${cur}"]`);
+                cur = n;
+                const next = document.querySelector(`[data-slide="${cur}"]`);
+
+                // Exit previous
+                gsap.to(prev, {
+                    opacity: 0, x: -40 * dir,
+                    duration: 0.18, ease: 'power2.in',
+                    onComplete: () => {
+                        prev.classList.remove('active');
+                        gsap.set(prev, { visibility: 'hidden' });
+                    }
+                });
+
+                // Enter next
+                next.classList.add('active');
+                gsap.set(next, { visibility: 'visible', opacity: 0, x: 40 * dir });
+                gsap.to(next, {
+                    opacity: 1, x: 0,
+                    duration: 0.25, ease: 'power2.out', delay: 0.05
+                });
+
+                animateIn(next);
+
+                // Update UI
+                progress.style.width = `${(cur / total) * 100}%`;
+                curNum.textContent = cur.toString().padStart(2, '0');
+            }
+
+            /* ═══ Initial ═══ */
+            progress.style.width = `${(1 / total) * 100}%`;
+            animateIn(document.querySelector('[data-slide="1"]'));
+
+            /* ═══ Controls ═══ */
+            document.getElementById('prevBtn').addEventListener('click', () => go(cur - 1));
+            document.getElementById('nextBtn').addEventListener('click', () => go(cur + 1));
+
+            document.addEventListener('keydown', e => {
+                if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') { e.preventDefault(); go(cur + 1); }
+                else if (e.key === 'ArrowLeft' || e.key === 'Backspace') { e.preventDefault(); go(cur - 1); }
+                else if (e.key === 'f' || e.key === 'F') { toggleFS(); }
+            });
+
+            /* ═══ Fullscreen ═══ */
+            const fsBtn = document.getElementById('fsBtn');
+            function toggleFS() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(() => { });
+                    fsBtn.textContent = '⊗';
+                } else {
+                    document.exitFullscreen();
+                    fsBtn.textContent = '⛶';
+                }
+            }
+            fsBtn.addEventListener('click', toggleFS);
+            document.addEventListener('fullscreenchange', () => {
+                fsBtn.textContent = document.fullscreenElement ? '⊗' : '⛶';
+                setTimeout(scale, 100);
+            });
+        })();
+    </script>
+</body>
+
+</html>
