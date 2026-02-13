@@ -11,11 +11,13 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SeatSelectionController {
 
-    // ===== FXML =====
     @FXML
     private GridPane seatGrid;
     @FXML
@@ -23,40 +25,28 @@ public class SeatSelectionController {
     @FXML
     private Label selectedSeatLabel;
 
-    // ===== SERVICES =====
     private final SeatService seatService = new SeatService();
 
-    // ===== SESSION / CONTEXT =====
-    private int userId;
     private int busId;
     private String busNumber;
     private String source;
     private String destination;
-
-    private Integer selectedSeatNumber = null;
+    private final List<Integer> selectedSeats = new ArrayList<>();
 
     // ===== CALLED FROM SearchBusController =====
-    public void setBookingContext(int userId,
-            int busId,
-            String busNumber,
-            String source,
-            String destination) {
-
-        this.userId = userId;
+    public void setBookingContext(int busId, String busNumber,
+            String source, String destination) {
         this.busId = busId;
         this.busNumber = busNumber;
         this.source = source;
         this.destination = destination;
 
-        busInfoLabel.setText(
-                "Bus: " + busNumber + " | " + source + " → " + destination);
-
+        busInfoLabel.setText("Bus: " + busNumber + "  |  " + source + " → " + destination);
         loadSeatsFromDatabase();
     }
 
     // ===== LOAD SEATS =====
     private void loadSeatsFromDatabase() {
-
         seatGrid.getChildren().clear();
 
         Map<Integer, Boolean> seats = seatService.getSeatAvailability(busId);
@@ -69,75 +59,106 @@ public class SeatSelectionController {
             boolean isBooked = entry.getValue();
 
             Button seatBtn = new Button(String.valueOf(seatNumber));
-            seatBtn.setMinSize(45, 40);
+            seatBtn.setMinSize(50, 45);
+            seatBtn.setPrefSize(55, 45);
 
             if (isBooked) {
                 seatBtn.getStyleClass().add("seat-booked");
                 seatBtn.setDisable(true);
             } else {
                 seatBtn.getStyleClass().add("seat-available");
-                seatBtn.setOnAction(e -> selectSeat(seatBtn, seatNumber));
+                seatBtn.setOnAction(e -> toggleSeat(seatBtn, seatNumber));
             }
 
             seatGrid.add(seatBtn, col, row);
             col++;
-            if (col == 4) { // 4 seats per row
+
+            // Add aisle gap after 2nd seat
+            if (col == 2) {
+                Label aisle = new Label("");
+                aisle.setMinWidth(30);
+                seatGrid.add(aisle, col, row);
+                col++;
+            }
+            if (col == 5) { // 2 seats + aisle + 2 seats = 5 columns
                 col = 0;
                 row++;
             }
         }
     }
 
-    // ===== SEAT SELECTION =====
-    private void selectSeat(Button clickedButton, int seatNumber) {
+    // ===== TOGGLE SEAT SELECTION (multi-select) =====
+    private void toggleSeat(Button clickedButton, int seatNumber) {
+        if (selectedSeats.contains(seatNumber)) {
+            // Deselect
+            selectedSeats.remove(Integer.valueOf(seatNumber));
+            clickedButton.getStyleClass().remove("seat-selected");
+            clickedButton.getStyleClass().add("seat-available");
+        } else {
+            // Select
+            selectedSeats.add(seatNumber);
+            clickedButton.getStyleClass().remove("seat-available");
+            clickedButton.getStyleClass().add("seat-selected");
+        }
 
-        // Clear previous selection
-        seatGrid.getChildren().forEach(node -> {
-            if (node instanceof Button btn &&
-                    btn.getStyleClass().contains("seat-selected")) {
-                btn.getStyleClass().remove("seat-selected");
-                btn.getStyleClass().add("seat-available");
-            }
-        });
+        updateSelectionLabel();
+    }
 
-        clickedButton.getStyleClass().remove("seat-available");
-        clickedButton.getStyleClass().add("seat-selected");
+    private void updateSelectionLabel() {
+        if (selectedSeats.isEmpty()) {
+            selectedSeatLabel.setText("Select a seat to continue");
+            selectedSeatLabel.getStyleClass().removeAll("highlight-label", "error-label");
+            selectedSeatLabel.getStyleClass().add("info-label");
+        } else {
+            String seatList = selectedSeats.stream()
+                    .sorted()
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(", "));
 
-        selectedSeatNumber = seatNumber;
-        selectedSeatLabel.setText("Selected Seat: " + seatNumber);
+            String label = selectedSeats.size() == 1
+                    ? "Selected Seat: " + seatList
+                    : "Selected " + selectedSeats.size() + " Seats: " + seatList;
+
+            selectedSeatLabel.setText(label);
+            selectedSeatLabel.getStyleClass().removeAll("error-label", "info-label");
+            selectedSeatLabel.getStyleClass().add("highlight-label");
+        }
     }
 
     // ===== CONFIRM BOOKING =====
     @FXML
     private void handleConfirmBooking() {
-
-        if (selectedSeatNumber == null) {
-            selectedSeatLabel.setText("Please select a seat first");
+        if (selectedSeats.isEmpty()) {
+            selectedSeatLabel.setText("⚠ Please select at least one seat");
+            selectedSeatLabel.getStyleClass().add("error-label");
             return;
         }
 
         try {
+            List<Integer> sortedSeats = selectedSeats.stream().sorted().collect(Collectors.toList());
+
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/fxml/booking_confirmation.fxml"));
             Parent root = loader.load();
 
             BookingController controller = loader.getController();
             controller.confirmBooking(
-                    userId,
                     busId,
-                    selectedSeatNumber,
+                    busNumber,
+                    source,
+                    destination,
+                    sortedSeats,
                     LocalDate.now());
 
             Stage stage = (Stage) seatGrid.getScene().getWindow();
             Scene scene = new Scene(root);
             scene.getStylesheets().add(
                     getClass().getResource("/css/style.css").toExternalForm());
-
             stage.setScene(scene);
             stage.show();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error loading booking confirmation: " + e.getMessage());
         }
     }
 
@@ -148,19 +169,15 @@ public class SeatSelectionController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/search_bus.fxml"));
             Parent root = loader.load();
 
-            SearchBusController controller = loader.getController();
-            controller.setUserSession(userId);
-
             Stage stage = (Stage) seatGrid.getScene().getWindow();
             Scene scene = new Scene(root);
             scene.getStylesheets().add(
                     getClass().getResource("/css/style.css").toExternalForm());
-
             stage.setScene(scene);
             stage.show();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error navigating back: " + e.getMessage());
         }
     }
 }

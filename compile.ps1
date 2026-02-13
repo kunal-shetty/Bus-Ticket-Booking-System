@@ -16,7 +16,8 @@ $javacArgs = @(
     "src/main/java/com/busbooking/dao/*.java",
     "src/main/java/com/busbooking/model/*.java",
     "src/main/java/com/busbooking/service/*.java",
-    "src/main/java/com/busbooking/util/*.java"
+    "src/main/java/com/busbooking/util/*.java",
+    "src/main/java/com/busbooking/exception/*.java"
 )
 
 javac @javacArgs

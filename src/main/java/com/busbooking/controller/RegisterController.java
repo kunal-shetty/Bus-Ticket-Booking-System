@@ -1,7 +1,6 @@
 package com.busbooking.controller;
 
 import com.busbooking.service.AuthService;
-import com.busbooking.service.SessionService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -11,25 +10,37 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-public class LoginController {
+public class RegisterController {
 
+    @FXML
+    private TextField nameField;
     @FXML
     private TextField emailField;
     @FXML
     private PasswordField passwordField;
     @FXML
+    private PasswordField confirmPasswordField;
+    @FXML
     private Label messageLabel;
 
     private final AuthService authService = new AuthService();
 
-    // ===== LOGIN HANDLER =====
+    // ===== REGISTER HANDLER =====
     @FXML
-    private void handleLogin() {
+    private void handleRegister() {
+        String name = nameField.getText().trim();
         String email = emailField.getText().trim();
-        String password = passwordField.getText().trim();
+        String password = passwordField.getText();
+        String confirmPassword = confirmPasswordField.getText();
 
-        if (email.isEmpty() || password.isEmpty()) {
-            showMessage("Please enter email and password", true);
+        // Validation
+        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+            showMessage("Please fill in all fields", true);
+            return;
+        }
+
+        if (name.length() < 2) {
+            showMessage("Name must be at least 2 characters", true);
             return;
         }
 
@@ -38,40 +49,40 @@ public class LoginController {
             return;
         }
 
-        AuthService.AuthResult result = authService.login(email, password);
+        if (password.length() < 6) {
+            showMessage("Password must be at least 6 characters", true);
+            return;
+        }
+
+        if (!password.equals(confirmPassword)) {
+            showMessage("Passwords do not match", true);
+            return;
+        }
+
+        AuthService.AuthResult result = authService.register(name, email, password);
 
         if (result.success) {
-            SessionService.startSession(result.userId, result.userName);
-            loadDashboard();
+            showMessage("Registration successful! Redirecting to login...", false);
+
+            // Navigate to login after a brief delay
+            javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(
+                    javafx.util.Duration.seconds(1.5));
+            pause.setOnFinished(e -> navigateToLogin());
+            pause.play();
         } else {
             showMessage(result.errorMessage, true);
         }
     }
 
-    // ===== REGISTER HANDLER =====
+    // ===== BACK TO LOGIN =====
     @FXML
-    private void handleRegister() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/register.fxml"));
-            Parent root = loader.load();
-
-            Stage stage = (Stage) emailField.getScene().getWindow();
-            Scene scene = new Scene(root);
-            scene.getStylesheets().add(
-                    getClass().getResource("/css/style.css").toExternalForm());
-            stage.setScene(scene);
-            stage.show();
-
-        } catch (Exception e) {
-            System.err.println("Error loading register screen: " + e.getMessage());
-            showMessage("Failed to load registration", true);
-        }
+    private void handleBackToLogin() {
+        navigateToLogin();
     }
 
-    // ===== LOAD DASHBOARD =====
-    private void loadDashboard() {
+    private void navigateToLogin() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
             Parent root = loader.load();
 
             Stage stage = (Stage) emailField.getScene().getWindow();
@@ -82,8 +93,7 @@ public class LoginController {
             stage.show();
 
         } catch (Exception e) {
-            System.err.println("Error loading dashboard: " + e.getMessage());
-            showMessage("Failed to load dashboard", true);
+            System.err.println("Error loading login screen: " + e.getMessage());
         }
     }
 

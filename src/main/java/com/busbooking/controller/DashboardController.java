@@ -1,5 +1,6 @@
 package com.busbooking.controller;
 
+import com.busbooking.service.SessionService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -13,14 +14,17 @@ public class DashboardController {
     @FXML
     private Label welcomeLabel;
 
-    // This should be set after login
-    private int loggedInUserId;
-    private String loggedInUserName;
+    // ===== CALLED AFTER FXML LOADS =====
+    @FXML
+    public void initialize() {
+        if (SessionService.isLoggedIn()) {
+            welcomeLabel.setText("Welcome, " + SessionService.getUserName());
+        }
+    }
 
-    // ===== CALLED AFTER LOGIN =====
+    // ===== KEPT FOR BACKWARDS COMPATIBILITY =====
     public void setUserSession(int userId, String userName) {
-        this.loggedInUserId = userId;
-        this.loggedInUserName = userName;
+        SessionService.startSession(userId, userName);
         welcomeLabel.setText("Welcome, " + userName);
     }
 
@@ -33,7 +37,6 @@ public class DashboardController {
 
     @FXML
     private void handleBookTicket(ActionEvent event) {
-        // Booking always starts with searching buses
         navigate(event, "/fxml/search_bus.fxml");
     }
 
@@ -44,6 +47,7 @@ public class DashboardController {
 
     @FXML
     private void handleLogout(ActionEvent event) {
+        SessionService.endSession();
         navigate(event, "/fxml/login.fxml");
     }
 
@@ -51,20 +55,10 @@ public class DashboardController {
     private void navigate(ActionEvent event, String fxmlPath) {
         try {
             Stage stage = (Stage) ((javafx.scene.Node) event.getSource())
-                    .getScene()
-                    .getWindow();
+                    .getScene().getWindow();
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
-
-            // Pass session to next controller if needed
-            Object controller = loader.getController();
-
-            if (controller instanceof SearchBusController searchBusController) {
-                searchBusController.setUserSession(loggedInUserId);
-            } else if (controller instanceof BookingHistoryController bookingHistoryController) {
-                bookingHistoryController.setUserSession(loggedInUserId);
-            }
 
             Scene scene = new Scene(root);
             scene.getStylesheets().add(
@@ -74,7 +68,7 @@ public class DashboardController {
             stage.show();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Navigation error: " + e.getMessage());
         }
     }
 }

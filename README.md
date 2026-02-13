@@ -1,73 +1,62 @@
+# 🚌 Bus Ticket Booking System (JavaFX + MySQL)
 
-````md
-# 🚌 Bus Ticket Booking System (Java + MySQL)
-
-A console-based Bus Ticket Booking System built using **Java**, **JDBC**, and **MySQL**.  
-This project demonstrates backend development using the DAO pattern and database connectivity.
+A desktop Bus Ticket Booking System built using **Java**, **JavaFX**, **JDBC**, and **MySQL**.
+This project demonstrates GUI-based development using the MVC pattern, FXML views, and database connectivity.
 
 ---
 
-## ⚙️ Setup & Run Instructions (Follow in Order)
+## ⚙️ Setup & Run Instructions
 
----
-
-## 1️⃣ Clone the Repository
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/your-username/Bus-Ticket-Booking-System.git
 cd Bus-Ticket-Booking-System
-````
+```
 
----
+### 2. Install & Start MySQL
 
-## 2️⃣ Install & Start WAMP or XAMPP
-
-1. Download and install the server
-2. Open **The Control Panel**
-3. Start **MySQL**
+1. Download and install **WAMP**, **XAMPP**, or a standalone MySQL server
+2. Open the control panel
+3. Start **MySQL** service
 
 > MySQL must be running before continuing.
 
----
+### 3. Create Database & Tables
 
-## 3️⃣ Create Database & Tables (Using SQL File)
+#### Using phpMyAdmin
 
-### Using phpMyAdmin 
-
-1. In the Control Panel, open **phpMyAdmin**
+1. Open **phpMyAdmin** from your control panel
 2. Go to the **Import** tab
-3. Select the `databaseTables.sql` file
-4. Click **Go**
+3. Select the `databaseTables.sql` file and click **Go**
 
-This will automatically create the database and required tables.
+This will create the `bus_ticket_booking_db` database and all required tables.
 
+### 4. (Optional) Load Sample Data
 
-## 5️⃣ Compile & Run the Application (Recommended)
+Import `seed_data.sql` via phpMyAdmin to populate the database with sample buses, seats, and users.
 
-Run the provided script:
+### 5. Configure Database Credentials
+
+Edit `src/main/java/com/busbooking/util/DBConnection.java` and update:
+- `USER` — your MySQL username (default: `root`)
+- `PASSWORD` — your MySQL password
+
+### 6. Compile & Run
 
 ```powershell
 .\compile.ps1
 ```
 
 This script will:
+- Compile all Java source files with JavaFX and MySQL connector
+- Copy resources (FXML, CSS, images) to the output directory
+- Launch the application
 
-* Compile all Java source files
-* Run the application automatically
-
-Run:
-
-```powershell
-java -cp "lib/mysql-connector-j.jar;bin" com.busbooking.app.Main
-```
 ---
 
 ## 📌 Notes
 
-* MySQL credentials assumed:
-
-  * **Username:** root
-  * **Password:** (According to your config)
-* Default MySQL port: **3306**
-* Update JDBC URL in code if using a different port
-
+- Default MySQL port: **3306**
+- Update the JDBC URL in `DBConnection.java` if using a different port
+- JavaFX SDK is bundled in the `lib/javafx/` directory

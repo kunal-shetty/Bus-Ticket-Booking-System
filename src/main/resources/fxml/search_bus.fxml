@@ -1,75 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.geometry.Pos?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.busbooking.controller.SearchBusController">
+            fx:controller="com.busbooking.controller.SearchBusController"
+            prefWidth="800" prefHeight="600">
 
     <!-- ===== TOP HEADER ===== -->
     <top>
-        <VBox spacing="10"
-              alignment="CENTER"
-              style="-fx-background-color: #1e90ff;">
+        <VBox spacing="4" alignment="CENTER" styleClass="page-header">
             <padding>
-                <Insets top="15" right="15" bottom="15" left="15"/>
+                <Insets top="18" right="20" bottom="18" left="20"/>
             </padding>
 
             <Label text="🔍 Search Buses"
-                   style="-fx-font-size: 20px;
-                          -fx-text-fill: white;
-                          -fx-font-weight: bold;" />
+                   styleClass="header-label"/>
 
             <Label text="Find available buses by route"
-                   style="-fx-text-fill: white;" />
+                   styleClass="sub-header"/>
         </VBox>
     </top>
 
-    <!-- ===== SEARCH FORM ===== -->
+    <!-- ===== CENTER CONTENT ===== -->
     <center>
-        <VBox spacing="20"
-              alignment="TOP_CENTER">
+        <VBox spacing="20" alignment="TOP_CENTER">
             <padding>
-                <Insets top="25" right="25" bottom="25" left="25"/>
+                <Insets top="25" right="30" bottom="25" left="30"/>
             </padding>
 
             <!-- Search Inputs -->
-            <HBox spacing="15"
-                  alignment="CENTER">
-
+            <HBox spacing="12" alignment="CENTER">
                 <TextField fx:id="sourceField"
-                           promptText="Source"
+                           promptText="Source city"
                            prefWidth="180"/>
 
                 <TextField fx:id="destinationField"
-                           promptText="Destination"
+                           promptText="Destination city"
                            prefWidth="180"/>
 
                 <Button text="Search"
                         onAction="#handleSearch"
-                        style="-fx-background-color: #1e90ff;
-                               -fx-text-fill: white;
-                               -fx-font-weight: bold;" />
+                        styleClass="primary-button"/>
+
+                <Button text="Show All"
+                        onAction="#handleShowAll"
+                        styleClass="secondary-button"/>
             </HBox>
 
             <!-- Result Table -->
             <TableView fx:id="busTable"
-                       prefHeight="300"
-                       prefWidth="650">
-
+                       VBox.vgrow="ALWAYS">
                 <columns>
                     <TableColumn fx:id="busIdColumn"
-                                 text="Bus ID"
-                                 prefWidth="80"/>
+                                 text="ID"
+                                 prefWidth="60"/>
 
                     <TableColumn fx:id="busNumberColumn"
                                  text="Bus Number"
@@ -84,33 +71,25 @@
                                  prefWidth="140"/>
 
                     <TableColumn fx:id="seatsColumn"
-                                 text="Seats"
+                                 text="Total Seats"
                                  prefWidth="100"/>
                 </columns>
             </TableView>
 
-            <!-- Message / Error -->
-            <Label fx:id="messageLabel"
-                   text=""
-                   style="-fx-text-fill: red;" />
+            <!-- Message -->
+            <Label fx:id="messageLabel" text=""
+                   styleClass="error-label"/>
 
             <!-- Action Buttons -->
-            <HBox spacing="20"
-                  alignment="CENTER">
-
-                <Button text="Select Bus"
+            <HBox spacing="16" alignment="CENTER">
+                <Button text="Select Bus →"
                         onAction="#handleSelectBus"
-                        style="-fx-background-color: #32cd32;
-                               -fx-text-fill: white;
-                               -fx-font-weight: bold;" />
+                        styleClass="success-button"/>
 
-                <Button text="Back"
+                <Button text="← Back to Dashboard"
                         onAction="#handleBack"
-                        style="-fx-background-color: #dc143c;
-                               -fx-text-fill: white;
-                               -fx-font-weight: bold;" />
+                        styleClass="secondary-button"/>
             </HBox>
-
         </VBox>
     </center>
 

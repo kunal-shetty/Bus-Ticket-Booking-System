@@ -1,17 +1,24 @@
 package com.busbooking.controller;
 
+import com.busbooking.exception.BookingException;
 import com.busbooking.service.BookingService;
+import com.busbooking.service.SessionService;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class BookingController {
 
-    // ===== FXML LABELS =====
     @FXML
     private Label bookingIdLabel;
     @FXML
@@ -25,76 +32,77 @@ public class BookingController {
     @FXML
     private Label fareLabel;
 
-    // ===== SERVICE =====
     private final BookingService bookingService = new BookingService();
 
-    // ===== DATA PASSED FROM PREVIOUS SCREEN =====
-    private int userId;
-    private int busId;
-    private int seatNumber;
-    private LocalDate travelDate;
+    private static final int FARE_PER_SEAT = 400;
 
-    // ===== INITIALIZATION =====
-    @FXML
-    public void initialize() {
-        // Nothing here on purpose.
-    }
-
-    // ===== MAIN ENTRY POINT FROM SeatSelectionController =====
-    public void confirmBooking(int userId,
-            int busId,
-            int seatNumber,
-            LocalDate travelDate) {
-
-        this.userId = userId;
-        this.busId = busId;
-        this.seatNumber = seatNumber;
-        this.travelDate = travelDate;
-
+    // ===== MAIN ENTRY POINT (multi-seat) =====
+    public void confirmBooking(int busId, String busNumber,
+            String source, String destination,
+            List<Integer> seatNumbers, LocalDate travelDate) {
         try {
-            // Call service to book ticket
-            int bookingId = bookingService.bookSeat(userId, busId, seatNumber, travelDate);
+            int userId = SessionService.getUserId();
+            List<Integer> bookingIds = bookingService.bookSeats(
+                    userId, busId, seatNumbers, travelDate);
 
-            if (bookingId > 0) {
-                // Success
-                bookingIdLabel.setText("BK" + bookingId);
-                seatNumberLabel.setText(String.valueOf(seatNumber));
-                travelDateLabel.setText(travelDate.toString());
-                fareLabel.setText("₹400");
+            // Format booking IDs
+            String bookingIdText = bookingIds.stream()
+                    .map(id -> "BK-" + String.format("%05d", id))
+                    .collect(Collectors.joining(", "));
 
-                // Note: In a real application, we would fetch and display the bus details here.
-                // For now, the booking ID and Seat Number are sufficient confimation.
+            // Format seat numbers
+            String seatText = seatNumbers.stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(", "));
 
-            } else {
-                showError("Booking failed. Seat might be already booked.");
-            }
+            // Calculate total fare
+            int totalFare = seatNumbers.size() * FARE_PER_SEAT;
 
+            // Populate confirmation details
+            bookingIdLabel.setText(bookingIdText);
+            busNumberLabel.setText(busNumber);
+            routeLabel.setText(source + " → " + destination);
+            seatNumberLabel.setText(seatText + "  (" + seatNumbers.size() + " seat"
+                    + (seatNumbers.size() > 1 ? "s" : "") + ")");
+            travelDateLabel.setText(travelDate.format(
+                    DateTimeFormatter.ofPattern("dd MMM yyyy")));
+            fareLabel.setText("₹ " + totalFare);
+
+        } catch (BookingException e) {
+            showError(e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Booking error: " + e.getMessage());
             showError("Booking failed. Please try again.");
         }
     }
 
-    // ===== UI ACTIONS =====
-
+    // ===== BOOK ANOTHER =====
     @FXML
     private void handleBookAnother() {
-        closeWindow();
-        // Navigation back to dashboard handled by caller
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) bookingIdLabel.getScene().getWindow();
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(
+                    getClass().getResource("/css/style.css").toExternalForm());
+            stage.setScene(scene);
+            stage.show();
+
+        } catch (Exception e) {
+            System.err.println("Error navigating to dashboard: " + e.getMessage());
+        }
     }
 
+    // ===== EXIT =====
     @FXML
     private void handleExit() {
-        closeWindow();
-        System.exit(0);
-    }
-
-    // ===== UTIL =====
-    private void closeWindow() {
         Stage stage = (Stage) bookingIdLabel.getScene().getWindow();
         stage.close();
     }
 
+    // ===== HELPERS =====
     private void showError(String message) {
         Alert alert = new Alert(AlertType.ERROR);
         alert.setTitle("Booking Error");

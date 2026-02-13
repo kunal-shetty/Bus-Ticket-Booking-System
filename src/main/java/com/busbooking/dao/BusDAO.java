@@ -14,7 +14,6 @@ public class BusDAO {
 
     // ===== GET ALL BUSES =====
     public List<Bus> getAllBuses() {
-
         List<Bus> buses = new ArrayList<>();
         String sql = "SELECT * FROM buses";
 
@@ -27,19 +26,18 @@ public class BusDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error fetching buses: " + e.getMessage());
         }
         return buses;
     }
 
     // ===== SEARCH BUSES =====
     public List<Bus> searchBuses(String source, String destination) {
-
         List<Bus> buses = new ArrayList<>();
         String sql = """
-                    SELECT * FROM buses
-                    WHERE LOWER(source) = LOWER(?)
-                    AND LOWER(destination) = LOWER(?)
+                SELECT * FROM buses
+                WHERE LOWER(source) = LOWER(?)
+                AND LOWER(destination) = LOWER(?)
                 """;
 
         try (Connection conn = DBConnection.getConnection();
@@ -48,13 +46,14 @@ public class BusDAO {
             ps.setString(1, source);
             ps.setString(2, destination);
 
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                buses.add(mapBus(rs));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    buses.add(mapBus(rs));
+                }
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error searching buses: " + e.getMessage());
         }
         return buses;
     }

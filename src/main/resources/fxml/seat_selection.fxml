@@ -1,110 +1,90 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.geometry.Pos?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.busbooking.controller.SeatSelectionController">
+            fx:controller="com.busbooking.controller.SeatSelectionController"
+            prefWidth="800" prefHeight="600">
 
     <!-- ===== TOP HEADER ===== -->
     <top>
-        <VBox alignment="CENTER"
-              spacing="5"
-              style="-fx-background-color: #1e90ff;">
+        <VBox alignment="CENTER" spacing="4" styleClass="page-header">
             <padding>
-                <Insets top="15" right="15" bottom="15" left="15"/>
+                <Insets top="18" right="20" bottom="18" left="20"/>
             </padding>
 
             <Label text="💺 Seat Selection"
-                   style="-fx-font-size: 20px;
-                          -fx-text-fill: white;
-                          -fx-font-weight: bold;" />
+                   styleClass="header-label"/>
 
             <Label fx:id="busInfoLabel"
-                   text="Bus: MH01-1234 | Mumbai → Pune"
-                   style="-fx-text-fill: white;" />
+                   text="Bus: MH01-1234  |  Mumbai → Pune"
+                   styleClass="sub-header"/>
         </VBox>
     </top>
 
     <!-- ===== CENTER SEAT GRID ===== -->
     <center>
-        <VBox alignment="CENTER"
-              spacing="20">
+        <VBox alignment="CENTER" spacing="20">
             <padding>
-                <Insets top="20" right="20" bottom="20" left="20"/>
+                <Insets top="20" right="30" bottom="10" left="30"/>
             </padding>
 
             <!-- Seat Legend -->
-            <HBox spacing="20"
-                  alignment="CENTER">
-
-                <HBox spacing="5" alignment="CENTER">
-                    <Label text="🟩"/>
-                    <Label text="Available"/>
+            <HBox spacing="30" alignment="CENTER">
+                <HBox spacing="8" alignment="CENTER">
+                    <Region styleClass="legend-dot, legend-dot-available"/>
+                    <Label text="Available" styleClass="info-label"/>
                 </HBox>
 
-                <HBox spacing="5" alignment="CENTER">
-                    <Label text="🟥"/>
-                    <Label text="Booked"/>
+                <HBox spacing="8" alignment="CENTER">
+                    <Region styleClass="legend-dot, legend-dot-booked"/>
+                    <Label text="Booked" styleClass="info-label"/>
                 </HBox>
 
-                <HBox spacing="5" alignment="CENTER">
-                    <Label text="🟦"/>
-                    <Label text="Selected"/>
+                <HBox spacing="8" alignment="CENTER">
+                    <Region styleClass="legend-dot, legend-dot-selected"/>
+                    <Label text="Selected" styleClass="info-label"/>
                 </HBox>
             </HBox>
 
             <!-- Scrollable Seat Area -->
-            <ScrollPane prefWidth="500"
-                        prefHeight="350"
-                        fitToWidth="true">
-
+            <ScrollPane prefWidth="450"
+                        fitToWidth="true"
+                        VBox.vgrow="ALWAYS">
                 <GridPane fx:id="seatGrid"
                           alignment="CENTER"
-                          hgap="10"
-                          vgap="10">
+                          hgap="8"
+                          vgap="8">
                     <padding>
-                        <Insets top="20" right="20" bottom="20" left="20"/>
+                        <Insets top="20" right="30" bottom="20" left="30"/>
                     </padding>
-                    <!-- Seats will be generated dynamically -->
                 </GridPane>
-
             </ScrollPane>
 
             <!-- Selected Seat Info -->
             <Label fx:id="selectedSeatLabel"
-                   text="Selected Seat: None"
-                   style="-fx-font-weight: bold;" />
+                   text="Select a seat to continue"
+                   styleClass="info-label"/>
         </VBox>
     </center>
 
     <!-- ===== BOTTOM ACTIONS ===== -->
     <bottom>
-        <HBox alignment="CENTER"
-              spacing="20">
+        <HBox alignment="CENTER" spacing="16">
             <padding>
-                <Insets top="15" right="15" bottom="15" left="15"/>
+                <Insets top="15" right="20" bottom="20" left="20"/>
             </padding>
 
-            <Button text="Confirm Booking"
+            <Button text="✓ Confirm Booking"
                     onAction="#handleConfirmBooking"
-                    style="-fx-background-color: #32cd32;
-                           -fx-text-fill: white;
-                           -fx-font-weight: bold;" />
+                    styleClass="success-button"/>
 
-            <Button text="Back"
+            <Button text="← Back"
                     onAction="#handleBack"
-                    style="-fx-background-color: #dc143c;
-                           -fx-text-fill: white;
-                           -fx-font-weight: bold;" />
+                    styleClass="secondary-button"/>
         </HBox>
     </bottom>
 
